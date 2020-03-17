@@ -1,0 +1,19 @@
+title: LoginRequest.v1
+type: object
+description: 로그인
+x-examples:
+  Example:
+    email: mansuiki@gmail.com
+    password: 'awesome-password!'
+properties:
+  email:
+    type: string
+    minLength: 4
+    maxLength: 120
+  password:
+    type: string
+    minLength: 4
+    maxLength: 60
+required:
+  - email
+  - password

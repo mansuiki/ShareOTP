@@ -1,0 +1,38 @@
+title: RegisterRequest.v1
+type: object
+x-examples:
+  Example:
+    name: 김경택
+    email: mansuiki@gmail.com
+    password: 'awesome.password!'
+    repassword: 'awesome.password!'
+    authid: 'asdvv!!2'
+properties:
+  name:
+    type: string
+    minLength: 1
+    maxLength: 30
+  email:
+    type: string
+    minLength: 4
+    maxLength: 120
+  password:
+    type: string
+    minLength: 4
+    maxLength: 60
+  repassword:
+    type: string
+    minLength: 4
+    maxLength: 60
+  authid:
+    type: string
+    description: Otp 추가용 인증번호
+    minLength: 4
+    maxLength: 60
+required:
+  - name
+  - email
+  - password
+  - repassword
+  - authid
+description: 회원가입

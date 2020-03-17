@@ -1,0 +1,264 @@
+openapi: 3.0.0
+info:
+  title: API.v1
+  version: '1.0'
+  description: ShareOTP API List
+  contact:
+    name: GyeongTaek Kim
+    email: mansuiki@gmail.com
+    url: 'https://github.com/mansuiki'
+servers:
+  - url: 'http://localhost:5000'
+paths:
+  /api/v1/login:
+    post:
+      summary: Login
+      operationId: post-api-v1-login
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                      access_token:
+                        type: string
+                      refresh_token:
+                        type: string
+              examples:
+                Awesome-Example:
+                  value:
+                    status: ok
+                    data:
+                      email: mansuiki@gmail.com
+                      access_token: token.jwt.token
+                      refresh_token: token.jwt.refresh
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type:
+                      - number
+                      - string
+                  msg:
+                    type: string
+              examples:
+                Awesome-Example:
+                  value:
+                    status: 400
+                    msg: ValidationError
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type:
+                      - number
+                      - string
+                  msg:
+                    type: string
+              examples:
+                Awesome-Example:
+                  value:
+                    status: 401
+                    msg: Invalid email or password
+      description: 로그인 API
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: ../models/LoginRequest.v1.yaml
+            examples:
+              Awesome-Example:
+                value:
+                  email: mansuiki@gmail.com
+                  password: 'awesome-password!'
+      parameters: []
+  /api/v1/register:
+    post:
+      summary: Register
+      operationId: post-api-v1-register
+      responses:
+        '201':
+          description: Created
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+              examples:
+                'Awesome!':
+                  value:
+                    status: ok
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type:
+                      - number
+                      - string
+                  msg:
+                    type: string
+              examples:
+                Password Not Match:
+                  value:
+                    status: 400
+                    msg: Password Not Match
+                Required Auth Id:
+                  value:
+                    status: 400
+                    msg: Required Auth Id
+                Else:
+                  value:
+                    status: 400
+                    msg: ValidationError
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type:
+                      - number
+                      - string
+                  msg:
+                    type: string
+              examples:
+                Email Conflict:
+                  value:
+                    status: 403
+                    msg: Email Already Used
+                Invalid AuthID:
+                  value:
+                    status: 403
+                    msg: Invalid AuthID
+      description: 'Awesome-Register!'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: ../models/RegisterRequest.v1.yaml
+            examples:
+              Awesome-Example:
+                value:
+                  name: 김경택
+                  email: mansuiki@gmail.com
+                  password: 'awesome.password!'
+                  repassword: 'awesome.password!'
+                  authid: 'asdvv!!2'
+        description: 회원가입 Api
+      parameters: []
+  /api/v1/otp:
+    get:
+      summary: Get Otps
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      otp_num:
+                        type: array
+                        items:
+                          type: string
+                      otp_comment:
+                        type: array
+                        items:
+                          type: string
+              examples:
+                Awesome-Example:
+                  value:
+                    status: ok
+                    data:
+                      otp_num:
+                        - '001122'
+                        - '224411'
+                      otp_comment:
+                        - 'Github : mansuiki@gmail.com'
+                        - 'Google : uniii'
+            application/xml:
+              schema:
+                type: object
+                properties: {}
+              examples:
+                example-1: {}
+      operationId: get-api-v1-otp
+      description: OTP 숫자 받기
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          required: true
+          description: Bearer Token - JWT Access Token
+  /api/v1/refresh:
+    get:
+      summary: JWT Refresh
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+              examples:
+                Awesome-Example:
+                  value:
+                    status: ok
+                    data:
+                      access_token: SAMPLE_ACCESS.TOKEN.YES
+      operationId: get-api-v1-refresh
+      description: JWT 인증 토큰 재발급 API
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: Bearer Token - JWT Refresh Token
+          required: true
+components:
+  schemas: {}
+  securitySchemes: {}
