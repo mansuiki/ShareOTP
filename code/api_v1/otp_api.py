@@ -3,7 +3,7 @@ from flask_jwt_extended import *
 from pyotp import TOTP
 
 from models import User, OtpList, Permission, db, crypt, jwt
-from .valid import valid_login, valid_register
+from .valid import valid_login, valid_register, valid_logout
 
 api = Blueprint('api', __name__)
 
@@ -53,6 +53,19 @@ def login():
         return jsonify({'status': 400, 'msg': data['msg']}), 400
 
 
+@api.route('/logout', methods=['POST'])
+def logout():
+    data = valid_logout(request.get_json())
+
+    if data['status']:
+        # TODO 데이터베이스 TOKEN BLACKLIST -- REVOKE!
+
+        return jsonify({'status': 'ok'}), 204
+
+    else:
+        return jsonify({'status': 400, 'msg': data['msg']}), 400
+
+
 @api.route('/register', methods=['POST'])
 def register():
     data = valid_register(request.get_json())
@@ -68,7 +81,7 @@ def register():
         otp_list = OtpList.query.filter(OtpList.authid == data['authid']).all()
 
         if not otp_list:
-            return jsonify({'status': 403, 'msg': 'Invalid AuthID'})
+            return jsonify({'status': 403, 'msg': 'Invalid AuthID'}), 403
 
         user = User()
         user.name = data['name']
@@ -97,7 +110,7 @@ def otp():
     identity = get_jwt_identity()
     user = User.query.filter(User.email == identity['email']).first()
     permission_list = Permission.query.filter(Permission.user_id == user.id).all()
-    result = {'otp_list': [], 'otp_num': []}
+    result = {'otp_num': [], 'otp_comment': []}
 
     for perm in permission_list:
         result['otp_num'].append(TOTP(perm.otp.secret).now())

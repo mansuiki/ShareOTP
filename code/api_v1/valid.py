@@ -49,6 +49,19 @@ register_schema = {
     "required": ["name", "email", "password", "repassword", "authid"]
 }
 
+logout_schema = {
+    "type": "object",
+    "properties": {
+        "access_token": {
+            "type": "string"
+        },
+        "refresh_token": {
+            "type": "string"
+        }
+    },
+    "required": ["access_token", "refresh_token"]
+}
+
 
 def valid_login(data):
     try:
@@ -63,6 +76,16 @@ def valid_login(data):
 def valid_register(data):
     try:
         validate(data, register_schema)
+    except ValidationError as e:
+        return {'status': False, 'msg': 'ValidationError'}
+    except SchemaError as e:
+        return {'status': False, 'msg': 'SchemaError'}
+    return {'status': True, 'data': data}
+
+
+def valid_logout(data):
+    try:
+        validate(data, logout_schema)
     except ValidationError as e:
         return {'status': False, 'msg': 'ValidationError'}
     except SchemaError as e:

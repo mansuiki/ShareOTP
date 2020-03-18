@@ -1,10 +1,155 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>OTP</title>
 
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+
+    <!-- JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+    <!-- JS-Cookie -->
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+
+    <!-- Jquery Circle Progress -->
+    <script src="https://rawgit.com/kottenator/jquery-circle-progress/1.2.2/dist/circle-progress.js"></script>
+
+    <!-- Clipboard JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            init();
+            new ClipboardJS('.copy');
+            setInterval(timer, 10);
+            setInterval(function () {
+                var now = new Date().getSeconds() % 30;
+                if (now < 3)
+                    get_otp();
+            }, 1000);
+        });
+
+        function logout() {
+            $.ajax({
+                url: '/api/v1/logout',
+                contentType: 'application/json',
+                method: 'POST',
+                data: JSON.stringify({
+                    access_token: Cookies.get('access_token'),
+                    refresh_token: Cookies.get('refresh_token')
+                })
+            }).done(function (res) {
+                Cookies.remove('access_token');
+                Cookies.remove('refresh_token');
+                window.location.href = "/"
+            })
+        }
+
+        function init() {
+            if (Cookies.get('access_token') === undefined || Cookies.get('refresh_token') === undefined) {
+                alert("You Need to Login First!");
+                window.location.href = "/";
+                return;
+            }
+
+            var now = new Date().getSeconds() % 30;
+            $('#CIRCLE').circleProgress({
+                value: now / 29,
+                animation: false,
+                startAngle: -Math.PI / 2,
+                size: 80,
+                fill: {
+                    color: '#ffa500'
+                }
+            });
+            get_otp()
+        }
+
+        function timer() {
+            var now = new Date().getSeconds() % 30 / 29;
+            $('#CIRCLE').circleProgress('value', now);
+        }
+
+        function re_auth() {
+            $.ajax({
+                url: '/api/v1/refresh',
+                method: 'GET',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + Cookies.get('refresh_token'));
+                }
+            }).done(function (res) {
+                Cookies.set('access_token', res.data.access_token)
+                get_otp()
+            })
+        }
+
+        function get_otp() {
+            $.ajax({
+                url: '/api/v1/otp',
+                method: 'GET',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + Cookies.get('access_token'));
+                },
+                complete: function (xhr) {
+                    if (xhr.status === 200) {
+                        var result = $.parseJSON(xhr.responseText);
+                        var otp_comment_list = result.data.otp_comment;
+                        var otp_num_list = result.data.otp_num;
+
+                        $("#OTPS").html("");
+
+                        for (var i = 0; i < otp_num_list.length; i++) {
+                            var elements = $('<div class="row mt-5" id=OTP-' + i.toString() + '></div>');
+                            elements = elements.append(
+                                $('<div/>', {
+                                        id: 'OTP',
+                                        class: "col",
+                                        text: otp_num_list[i]
+                                    }
+                                ),
+                                $("<div/>", {
+                                        id: 'COMMENT',
+                                        class: "col",
+                                        text: otp_comment_list[i]
+                                    }
+                                ),
+                                $("<button/>", {
+                                        class: "copy col btn btn-primary",
+                                        "data-clipboard-text": otp_num_list[i],
+                                        text: "copy"
+                                    }
+                                )
+                            );
+                            $("#OTPS").append(elements)
+                        }
+                    } else {
+                        re_auth()
+                    }
+                }
+            })
+        }
+
+
+    </script>
+</head>
+
+<body>
+<div class="container">
+    <div class="row mt-5">
+        <h1>OTP</h1>
+        <button class="btn btn-primary" onclick="get_otp()">REFRESH!</button>
+        <div class="p-2" id="CIRCLE"></div>
+        <button class="btn btn-primary" onclick="logout()">LOGOUT!</button>
+    </div>
+    <div class="d-flex flex-column" id="OTPS">
+    </div>
+</div>
 </body>
+
 </html>

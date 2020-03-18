@@ -1,10 +1,85 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Register</title>
 
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+
+    <!-- JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+    <!-- JS-Cookie -->
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+
+    <script>
+        function login() {
+            $.ajax({
+                url: '/api/v1/register',
+                contentType: 'application/json',
+                method: 'POST',
+                data: JSON.stringify({
+                    name: $('#name').val(),
+                    email: $('#email').val(),
+                    password: $('#password').val(),
+                    repassword: $('#repassword').val(),
+                    authid: $('#authid').val()
+                }),
+                complete: function (xhr) {
+                    if (xhr.status === 200)
+                        window.location.href = '/login';
+                    else {
+                        var result = $.parseJSON(xhr.responseText);
+                        alert(result.msg);
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+
+<body>
+<div class="container">
+    <div class="row mt-5">
+        <h1>회원가입</h1>
+    </div>
+    <div class="row mt-5">
+        <div class="col-12">
+            <form>
+                <div class="form-group">
+                    <label for="name">이름</label>
+                    <input type="text" class="form-control" id="name" placeholder="이름" name="name"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">이메일</label>
+                    <input type="text" class="form-control" id="email" placeholder="이메일" name="email"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" class="form-control" id="password" placeholder="비밀번호" name="password"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="repassword">비밀번호 확인</label>
+                    <input type="password" class="form-control" id="repassword" placeholder="비밀번호 확인"
+                           name="repassword"/>
+                </div>
+                <div class="form-group">
+                    <label for="authid">인증번호</label>
+                    <input type="password" class="form-control" id="authid" placeholder="인증번호" name="authid"/>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="login();">회원가입</button>
+            </form>
+        </div>
+    </div>
+</div>
 </body>
+
 </html>
